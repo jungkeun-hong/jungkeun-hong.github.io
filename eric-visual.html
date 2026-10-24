@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARBYN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: 1920px 1080px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #060608; color: #F5F5F3;
+    font-family: 'Helvetica Now Display', 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body.web-mode { overflow-x: hidden; scroll-snap-type: y mandatory; }
+  .slide-viewport {
+    width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center;
+    scroll-snap-align: start; position: relative; overflow: hidden; background: #060608;
+  }
+  .slide {
+    width: 1920px; height: 1080px; position: relative; overflow: hidden; flex-shrink: 0;
+    transform-origin: center center;
+    background: #0B0B0D url('assets/bg_cover.png') center/1920px 1080px no-repeat;
+    color: #F5F5F3; box-shadow: 0 24px 80px rgba(0,0,0,0.75);
+  }
+  .slide-bg-overlay {
+    position: absolute; inset: 0;
+    background: rgba(8, 9, 12, 0.58); z-index: 1;
+  }
+  .pad {
+    position: absolute; left: 96px; top: 64px; width: 1728px; bottom: 104px;
+    display: flex; flex-direction: column; z-index: 5;
+  }
+  .header-row {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; height: 38px; margin-bottom: 14px; flex-shrink: 0;
+  }
+  .label {
+    font-size: 18px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #B4B4AE;
+  }
+  .brand-logo { height: 32px; width: auto; display: block; }
+  h1 {
+    font-size: 72px; font-weight: 700; line-height: 1.05; letter-spacing: -0.03em;
+    color: #F5F5F3; margin-bottom: 26px; flex-shrink: 0;
+  }
+  h1 .hl { color: #FFCD11; }
+  .card {
+    background: rgba(18, 20, 26, 0.74);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px; padding: 34px 38px;
+    backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+    display: flex; flex-direction: column;
+  }
+  .card.gold {
+    background: linear-gradient(155deg, rgba(255, 205, 17, 0.17) 0%, rgba(18, 20, 26, 0.84) 100%);
+    border: 1.5px solid rgba(255, 205, 17, 0.55);
+  }
+  .card.green {
+    background: linear-gradient(155deg, rgba(16, 185, 129, 0.16) 0%, rgba(18, 20, 26, 0.84) 100%);
+    border: 1.5px solid rgba(16, 185, 129, 0.50);
+  }
+  .card.blue {
+    background: linear-gradient(155deg, rgba(59, 130, 246, 0.16) 0%, rgba(18, 20, 26, 0.84) 100%);
+    border: 1.5px solid rgba(59, 130, 246, 0.48);
+  }
+  .kicker {
+    font-size: 16px; font-weight: 800; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #9CA3AF; margin-bottom: 16px; flex-shrink: 0;
+  }
+  .card.gold .kicker { color: #FFCD11; }
+  .card.green .kicker { color: #34D399; }
+  .card.blue .kicker { color: #60A5FA; }
+  .huge {
+    font-size: 96px; font-weight: 800; line-height: 0.98; letter-spacing: -0.04em;
+    color: #FFF; margin-bottom: 14px;
+  }
+  .huge.hl { color: #FFCD11; }
+  .huge.green { color: #34D399; }
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; padding-top: 18px; }
+  .tag {
+    padding: 11px 20px; border-radius: 12px; font-size: 21px; font-weight: 600;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); color: #E5E5E0;
+  }
+  .tag.gold { background: rgba(255,205,17,0.16); border-color: rgba(255,205,17,0.5); color: #FFCD11; }
+  .tag.green { background: rgba(16,185,129,0.16); border-color: rgba(16,185,129,0.5); color: #34D399; }
+  .ftr-rule {
+    position: absolute; left: 96px; top: 992px; width: 1728px; height: 1px;
+    background: rgba(255, 255, 255, 0.18); z-index: 5;
+  }
+  .ftr {
+    position: absolute; left: 96px; top: 1008px; width: 1728px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 17px; color: #8E8E89; z-index: 5; letter-spacing: 0.08em;
+  }
+  .deck-hud {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    background: rgba(18, 18, 20, 0.90); border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px); padding: 8px 16px; border-radius: 999px;
+    display: flex; align-items: center; gap: 12px; z-index: 999; font-size: 13px; color: #E5E5E0;
+  }
+  .deck-hud button {
+    background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; padding: 5px 12px; border-radius: 999px; cursor: pointer; font-size: 12px; font-weight: 600;
+  }
+  .deck-hud button:hover { background: #FFCD11; color: #000; border-color: #FFCD11; }
+  @media print {
+    body.web-mode { scroll-snap-type: none; }
+    .slide-viewport { width: 1920px; height: 1080px; page-break-after: always; }
+    .slide { transform: none !important; box-shadow: none; }
+    .deck-hud { display: none !important; }
+  }
+</style>
+</head>
+<body class="web-mode">
+
+<!-- ==================== SLIDE 1: 3-MONTH UPGRADE ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">01 · PROGRESS SINCE JULY 1</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>Upgraded Engine. <span class="hl">73 Meetings.</span> 4x Faster Loop.</h1>
+
+    <!-- Top Timeline Box (Pure HTML/CSS Grid so zero text clipping) -->
+    <div class="card" style="padding: 28px 42px; margin-bottom: 26px;">
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 24px; position:relative;">
+        <div style="border-left: 4px solid #9CA3AF; padding-left: 18px;">
+          <div style="font-size:15px;font-weight:800;color:#9CA3AF;letter-spacing:0.1em;">JULY 1</div>
+          <div style="font-size:26px;font-weight:800;color:#E5E5E0;margin-top:4px;">Last Sync</div>
+          <div style="font-size:19px;color:#9CA3AF;margin-top:2px;">Goal: 5 Design Partners</div>
+        </div>
+        <div style="border-left: 4px solid #FFCD11; padding-left: 18px;">
+          <div style="font-size:15px;font-weight:800;color:#FFCD11;letter-spacing:0.1em;">AUG 18</div>
+          <div style="font-size:26px;font-weight:800;color:#FFF;margin-top:4px;">Co-Founder Upgrade</div>
+          <div style="font-size:19px;color:#D4D4CE;margin-top:2px;">Clean Split → Neo Lee (CTO)</div>
+        </div>
+        <div style="border-left: 4px solid #FFCD11; padding-left: 18px;">
+          <div style="font-size:15px;font-weight:800;color:#FFCD11;letter-spacing:0.1em;">SEPT TO OCT</div>
+          <div style="font-size:26px;font-weight:800;color:#FFF;margin-top:4px;">73 Customer Meetings</div>
+          <div style="font-size:19px;color:#D4D4CE;margin-top:2px;">6,500 Outbound + SMRP Booth</div>
+        </div>
+        <div style="border-left: 4px solid #10B981; padding-left: 18px;">
+          <div style="font-size:15px;font-weight:800;color:#34D399;letter-spacing:0.1em;">OCT 23</div>
+          <div style="font-size:26px;font-weight:800;color:#34D399;margin-top:4px;">4.5% Local Reply</div>
+          <div style="font-size:19px;color:#D4D4CE;margin-top:2px;">Bay Area Drip + PLG Launch</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; flex: 1;">
+      <div class="card gold">
+        <div class="kicker">01 · CO-FOUNDER &amp; CTO</div>
+        <div class="huge hl" style="margin-top:12px;">Neo Lee</div>
+        <div style="font-size:30px;font-weight:700;color:#FFF;margin-top:8px;">Full-Stack Physical AI Builder</div>
+        <div style="font-size:22px;color:#D4D4CE;margin-top:12px;line-height:1.4;">ROKA Top-20 STEM Robotics Officer. Shipped 4 production systems in 8 weeks.</div>
+        <div class="tag-grid">
+          <span class="tag gold">Edge AI &amp; 3DGS</span>
+          <span class="tag">Milestone-Gated Equity</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="kicker">02 · PAID B2B PILOTS</div>
+        <div class="huge" style="margin-top:12px;">$25K</div>
+        <div style="font-size:30px;font-weight:700;color:#FFF;margin-top:8px;">2 Active + 2 Proposals Out</div>
+        <div style="font-size:22px;color:#D4D4CE;margin-top:12px;line-height:1.4;">Pivoted ICP from CNC machine shops to Factory &amp; Facility Maintenance.</div>
+        <div class="tag-grid">
+          <span class="tag green">Dunmore ($5K Signed)</span>
+          <span class="tag green">JW Aluminum ($9K)</span>
+          <span class="tag gold">Leitz &amp; Nahanni ($11K)</span>
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="kicker">03 · REPLY VELOCITY JUMP</div>
+        <div class="huge green" style="margin-top:12px;">1.1% → 4.5%</div>
+        <div style="font-size:30px;font-weight:700;color:#FFF;margin-top:8px;">Bay Area Local + Visual SOP</div>
+        <div style="font-size:22px;color:#D4D4CE;margin-top:12px;line-height:1.4;">4 positive replies in first 88 local emails sent over 48 hours.</div>
+        <div class="tag-grid">
+          <span class="tag green">Stanford</span>
+          <span class="tag green">Therma VP</span>
+          <span class="tag green">Devcon</span>
+          <span class="tag green">UC Davis</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>01 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 2: PRODUCT & VALUE (ZERO EMPTY GAP, FULL HEIGHT FLOW) ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">02 · PRODUCT &amp; VALUE</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>AI Copilot on <span class="hl">Safety Glasses &amp; Phone.</span></h1>
+
+    <div style="display: grid; grid-template-columns: 1.22fr 0.78fr; gap: 28px; flex: 1;">
+      <!-- Left: Full-Height 3-Column Visual Architecture (HTML Flexbox so zero dead space & zero overflow!) -->
+      <div class="card" style="padding: 32px 34px;">
+        <div class="kicker">POINT-OF-WORK EXECUTION LAYER (NO CUSTOM HARDWARE)</div>
+        <div style="display:grid; grid-template-columns: 1fr 36px 1.25fr 36px 0.95fr; gap: 12px; flex: 1; align-items: stretch;">
+          <!-- Col 1: Hardware Input -->
+          <div style="background:rgba(255,205,17,0.13); border:2px solid #FFCD11; border-radius:20px; padding:26px 22px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="font-size:14px;font-weight:800;color:#FFCD11;letter-spacing:0.1em;">INPUT DEVICE</div>
+              <div style="font-size:32px;font-weight:800;color:#FFF;margin-top:10px;line-height:1.15;">Z87.1+ Glasses<br><span style="color:#FFCD11;">or Phone</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin:16px 0;">
+              <div style="background:rgba(0,0,0,0.35);padding:10px 14px;border-radius:10px;font-size:19px;font-weight:600;color:#E5E5E0;">🕶️ Meta · Mentra · Viture</div>
+              <div style="background:rgba(0,0,0,0.35);padding:10px 14px;border-radius:10px;font-size:19px;font-weight:600;color:#E5E5E0;">📱 iOS / Android + AirPods</div>
+              <div style="background:rgba(0,0,0,0.35);padding:10px 14px;border-radius:10px;font-size:19px;font-weight:600;color:#E5E5E0;">🥽 Hapware · Aircaps · Mira</div>
+            </div>
+            <div style="font-size:17px;font-weight:800;color:#34D399;">✓ Offline Edge Ready</div>
+          </div>
+
+          <!-- Arrow 1 -->
+          <div style="display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#FFCD11;">→</div>
+
+          <!-- Col 2: 4 Core Features -->
+          <div style="display:flex; flex-direction:column; justify-content:space-between; gap:14px;">
+            <div style="flex:1; background:rgba(255,205,17,0.20); border:2px solid #FFCD11; border-radius:16px; padding:16px 22px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-size:13px;font-weight:800;color:#FFCD11;letter-spacing:0.1em;">01 · TRIBAL KNOWLEDGE CAPTURE</div>
+              <div style="font-size:25px;font-weight:800;color:#FFF;margin-top:4px;">Video → Visual SOP in 30s</div>
+            </div>
+            <div style="flex:1; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.2); border-radius:16px; padding:16px 22px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-size:13px;font-weight:800;color:#9CA3AF;letter-spacing:0.1em;">02 · CMMS VOICE COPILOT</div>
+              <div style="font-size:25px;font-weight:700;color:#FFF;margin-top:4px;">Work Order Read &amp; Closeout</div>
+            </div>
+            <div style="flex:1; background:rgba(255,255,255,0.06); border:1.5px solid rgba(255,255,255,0.2); border-radius:16px; padding:16px 22px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-size:13px;font-weight:800;color:#9CA3AF;letter-spacing:0.1em;">03 · FIELD TROUBLESHOOTING</div>
+              <div style="font-size:25px;font-weight:700;color:#FFF;margin-top:4px;">Real-Time Repair Guidance</div>
+            </div>
+            <div style="flex:1; background:rgba(16,185,129,0.16); border:2px solid #10B981; border-radius:16px; padding:16px 22px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-size:13px;font-weight:800;color:#34D399;letter-spacing:0.1em;">04 · SPATIAL DIGITAL TWIN</div>
+              <div style="font-size:25px;font-weight:800;color:#FFF;margin-top:4px;">3D Gaussian Splatting Scan</div>
+            </div>
+          </div>
+
+          <!-- Arrow 2 -->
+          <div style="display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#FFCD11;">→</div>
+
+          <!-- Col 3: System of Record Output -->
+          <div style="background:rgba(59,130,246,0.15); border:2px solid #60A5FA; border-radius:20px; padding:26px 22px; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="font-size:14px;font-weight:800;color:#60A5FA;letter-spacing:0.1em;">SYSTEM OF RECORD</div>
+              <div style="font-size:32px;font-weight:800;color:#FFF;margin-top:10px;line-height:1.15;">CMMS &amp;<br>PDF Reports</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin:16px 0;">
+              <div style="background:rgba(0,0,0,0.35);padding:10px 14px;border-radius:10px;font-size:19px;font-weight:700;color:#93C5FD;">Limble · Coast · Cortex</div>
+              <div style="background:rgba(0,0,0,0.35);padding:10px 14px;border-radius:10px;font-size:19px;font-weight:700;color:#93C5FD;">MaintainX · CxAlloy</div>
+              <div style="background:rgba(0,0,0,0.35);padding:10px 14px;border-radius:10px;font-size:19px;font-weight:700;color:#FFCD11;">CMMSRadio Advisor</div>
+            </div>
+            <div style="font-size:17px;font-weight:800;color:#FFCD11;">✓ Auto-Synced</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: 3 Value Pillars -->
+      <div style="display:flex; flex-direction:column; gap:22px;">
+        <div class="card gold" style="flex:1; justify-content:center;">
+          <div class="kicker">VALUE 01 · ONBOARDING &amp; TRAINING</div>
+          <div style="font-size:50px;font-weight:800;color:#FFCD11;line-height:1.05;">Do Job Once → SOP</div>
+          <div style="font-size:22px;color:#E5E5E0;margin-top:10px;">Cuts new technician onboarding time &amp; repeat errors.</div>
+        </div>
+        <div class="card green" style="flex:1; justify-content:center;">
+          <div class="kicker">VALUE 02 · EQUIPMENT RELIABILITY</div>
+          <div style="font-size:50px;font-weight:800;color:#34D399;line-height:1.05;">↓ Downtime &amp; MTTR</div>
+          <div style="font-size:22px;color:#E5E5E0;margin-top:10px;">Instant repair history &amp; schematics while hands stay on the tool.</div>
+        </div>
+        <div class="card" style="flex:1; justify-content:center;">
+          <div class="kicker">VALUE 03 · ZERO PAPERWORK</div>
+          <div style="font-size:50px;font-weight:800;color:#FFF;line-height:1.05;">45m → 30s Reports</div>
+          <div style="font-size:22px;color:#D4D4CE;margin-top:10px;">Eliminates end-of-shift desk typing in EN / ES / KR.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>02 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 3: COHORT 1 VS COHORT 2 FUNNEL ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">03 · OUTBOUND FUNNEL: COHORT 1 VS. COHORT 2</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>73 Meetings Taught Us <span class="hl">What Converts.</span></h1>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; flex: 1;">
+      <!-- Left: Cohort 1 -->
+      <div class="card" style="justify-content:space-between;">
+        <div>
+          <div class="kicker">COHORT 1 (AUG TO OCT) · NATIONAL OUTBOUND + BOOTH</div>
+          <div style="font-size:38px;font-weight:800;margin-bottom:26px;">6,500 Touches + SMRP Conference</div>
+
+          <div style="display:flex;flex-direction:column;gap:22px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:21px;font-weight:700;margin-bottom:8px;">
+                <span style="color:#9CA3AF;">1. Outbound (Origami 4K · Gojiberry 2K · Direct 500) + Booth</span>
+                <span style="color:#FFF;font-weight:800;">6,500 + 87</span>
+              </div>
+              <div style="width:100%;height:44px;background:#475569;border-radius:10px;display:flex;align-items:center;padding:0 18px;font-size:20px;font-weight:800;">6,500 Cold Outbound · 87 Booth Visitors (61 SQLs)</div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:21px;font-weight:700;margin-bottom:8px;">
+                <span style="color:#E5E5E0;">2. 1st Discovery &amp; Demo Meetings</span>
+                <span style="color:#60A5FA;font-weight:800;">73 Meetings (1.1%)</span>
+              </div>
+              <div style="width:52%;height:44px;background:#60A5FA;color:#08090C;border-radius:10px;display:flex;align-items:center;padding:0 18px;font-size:20px;font-weight:800;">73 Meetings Held</div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:21px;font-weight:700;margin-bottom:8px;">
+                <span style="color:#FFCD11;">3. Paid Pilots Signed / Active (0.3%)</span>
+                <span style="color:#FFCD11;font-weight:800;">2 Active ($14K) + 2 Out ($11K)</span>
+              </div>
+              <div style="width:28%;height:44px;background:#FFCD11;color:#08090C;border-radius:10px;display:flex;align-items:center;padding:0 18px;font-size:20px;font-weight:800;">2 Paid Pilots</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tag-grid">
+          <span class="tag">Cintas</span><span class="tag">USPS</span><span class="tag">Walmart</span><span class="tag">Target</span><span class="tag">Xylem</span><span class="tag">UCSF</span><span class="tag">Hayco</span><span class="tag">Novolex</span><span class="tag">Petronas</span><span class="tag">Granite</span>
+        </div>
+      </div>
+
+      <!-- Right: Cohort 2 -->
+      <div class="card gold" style="justify-content:space-between;">
+        <div>
+          <div class="kicker">COHORT 2 (LIVE THIS WEEK) · BAY AREA LOCAL + SOP HOOK</div>
+          <div style="font-size:38px;font-weight:800;color:#FFCD11;margin-bottom:26px;">386 Local Targets @ 60/Day</div>
+
+          <div style="display:flex;flex-direction:column;gap:22px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:21px;font-weight:700;margin-bottom:8px;">
+                <span style="color:#E5E5E0;">1. Verified Bay Area Local Targets</span>
+                <span style="color:#FFF;font-weight:800;">386 Direct Emails</span>
+              </div>
+              <div style="width:100%;height:44px;background:rgba(255,205,17,0.28);border:2px solid #FFCD11;border-radius:10px;display:flex;align-items:center;padding:0 18px;font-size:20px;font-weight:800;">Schools · MEP Contractors · Plants · Utilities</div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:21px;font-weight:700;margin-bottom:8px;">
+                <span style="color:#E5E5E0;">2. Dispatched in First 48 Hours</span>
+                <span style="color:#FFCD11;font-weight:800;">88 Delivered (296 Queued)</span>
+              </div>
+              <div style="width:55%;height:44px;background:#FFCD11;color:#08090C;border-radius:10px;display:flex;align-items:center;padding:0 18px;font-size:20px;font-weight:800;">88 Sent So Far</div>
+            </div>
+
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:21px;font-weight:700;margin-bottom:8px;">
+                <span style="color:#34D399;">3. Positive Replies in 48 Hours</span>
+                <span style="color:#34D399;font-weight:900;">4 Replies (4.5% · 4x Jump!)</span>
+              </div>
+              <div style="width:42%;height:44px;background:#10B981;color:#08090C;border-radius:10px;display:flex;align-items:center;padding:0 18px;font-size:20px;font-weight:900;">4.5% Reply Rate</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tag-grid">
+          <span class="tag green">Stanford University (Demo Done)</span>
+          <span class="tag green">Therma (VP Service Ops)</span>
+          <span class="tag green">Devcon Construction</span>
+          <span class="tag green">UC Davis</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>03 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 4: KEY LEARNINGS (HTML CARDS SO ZERO CLIPPING!) ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">04 · KEY LEARNINGS FROM 73 MEETINGS</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>Why Conversion Lagged &amp; <span class="hl">How We Fixed It.</span></h1>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; flex: 1;">
+      <!-- Left: Offer Shift (Pure HTML Boxes so zero text overflow!) -->
+      <div class="card gold" style="justify-content:space-between;">
+        <div class="kicker">LEARNING 01 · PERCEIVED PRODUCT VALUE (1.5X VS. 10X)</div>
+        <div style="font-size:38px;font-weight:800;margin-bottom:18px;">Vitamin Pitch vs. Painkiller Offer</div>
+
+        <div style="display:flex; flex-direction:column; gap:22px; flex:1; justify-content:center;">
+          <div style="background:rgba(0,0,0,0.38); border:1.5px solid rgba(248,113,113,0.45); border-radius:20px; padding:26px 30px;">
+            <div style="font-size:15px;font-weight:800;color:#F87171;letter-spacing:0.1em;">OLD PITCH (1.5X VITAMIN → 6-MO IT STALL)</div>
+            <div style="font-size:28px;font-weight:800;color:#E5E5E0;margin-top:8px;">"Voice CMMS + AI Glasses"</div>
+            <div style="font-size:21px;color:#9CA3AF;margin-top:6px;">Feels like a nice-to-have → stalls in IT, union, &amp; budget reviews.</div>
+          </div>
+
+          <div style="text-align:center;font-size:32px;font-weight:900;color:#FFCD11;line-height:1;">↓</div>
+
+          <div style="background:rgba(255,205,17,0.18); border:2px solid #FFCD11; border-radius:20px; padding:26px 30px;">
+            <div style="font-size:15px;font-weight:800;color:#FFCD11;letter-spacing:0.1em;">NEW OFFER (10X PAINKILLER → FAST CARD SWIPE)</div>
+            <div style="font-size:28px;font-weight:800;color:#FFF;margin-top:8px;">"$5K to $9K Visual SOP &amp; Report Pilot"</div>
+            <div style="font-size:21px;color:#FDE68A;margin-top:6px;">Fits manager's discretionary card with zero IT integration Day 1.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: 4 Blockers Mapped to Solutions -->
+      <div class="card" style="justify-content:space-between;">
+        <div class="kicker">LEARNING 02 · PRE-DEPLOYMENT FRICTION</div>
+        <div style="font-size:38px;font-weight:800;margin-bottom:18px;">Every Field Blocker Solved</div>
+
+        <div style="display:flex; flex-direction:column; justify-content:space-between; gap:16px; flex:1;">
+          <div style="flex:1; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); padding:0 28px; border-radius:18px;">
+            <span style="font-size:24px;font-weight:700;color:#FCA5A5;">📡 No Wi-Fi / Camera Ban</span>
+            <span style="font-size:24px;font-weight:800;color:#34D399;">→ Offline Edge + Audio Mode</span>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); padding:0 28px; border-radius:18px;">
+            <span style="font-size:24px;font-weight:700;color:#FCA5A5;">🕶️ Meta HW Dependency</span>
+            <span style="font-size:24px;font-weight:800;color:#34D399;">→ Phone "Skateboard" App</span>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; justify-content:space-between; background:rgba(255,205,17,0.12); border:1.5px solid rgba(255,205,17,0.45); padding:0 28px; border-radius:18px;">
+            <span style="font-size:23px;font-weight:700;color:#FCA5A5;">🏭 Harsh / Slow Factory Zones</span>
+            <span style="font-size:23px;font-weight:800;color:#FFCD11;">→ Data Center Cx &amp; MEP Subs</span>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); padding:0 28px; border-radius:18px;">
+            <span style="font-size:24px;font-weight:700;color:#FCA5A5;">⏳ 2 to 6 Mo Sales Cycle</span>
+            <span style="font-size:24px;font-weight:800;color:#FFCD11;">→ 24-Hour PLG Loop</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>04 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 5: BOTTOM-UP PLG ("SKATEBOARD") TO B2B LADDER ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">05 · FAST FEEDBACK LOOP: B2B2C PLG MOTION</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>24-Hour PLG Loop Feeds <span class="hl">B2B Pilots.</span></h1>
+
+    <!-- 4-Step Full-Height HTML Grid -->
+    <div style="display:grid; grid-template-columns: 1fr 32px 1fr 32px 1fr 32px 1fr; gap: 12px; flex: 1; align-items: stretch;">
+      <div class="card gold" style="justify-content:space-between; text-align:center; padding:36px 28px;">
+        <div class="kicker">STEP 01 · SKATEBOARD APP</div>
+        <div>
+          <div style="font-size:42px;font-weight:800;color:#FFF;margin-bottom:14px;">1-Tap Note</div>
+          <div style="font-size:23px;color:#E5E5E0;line-height:1.4;">Tech talks &amp; snaps photos on phone → Gets clean PDF Report in 30s.</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.45);padding:20px;border-radius:16px;font-size:26px;font-weight:800;color:#FFCD11;">500+ Users</div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#FFCD11;">→</div>
+
+      <div class="card" style="justify-content:space-between; text-align:center; padding:36px 28px;">
+        <div class="kicker">STEP 02 · VIRAL SHARE</div>
+        <div>
+          <div style="font-size:42px;font-weight:800;color:#FFF;margin-bottom:14px;">Boss Link</div>
+          <div style="font-size:23px;color:#D4D4CE;line-height:1.4;">Shared via WhatsApp / SMS to supervisor with Carbyn footer watermark.</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.45);padding:20px;border-radius:16px;font-size:26px;font-weight:800;color:#FFF;">50%+ Retention</div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#FFCD11;">→</div>
+
+      <div class="card blue" style="justify-content:space-between; text-align:center; padding:36px 28px;">
+        <div class="kicker">STEP 03 · GLASSES UNLOCK</div>
+        <div>
+          <div style="font-size:42px;font-weight:800;color:#FFF;margin-bottom:14px;">Free Z87.1+</div>
+          <div style="font-size:23px;color:#E5E5E0;line-height:1.4;">Log 10+ reports + book 15-min Manager Demo to unlock free safety glasses.</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.45);padding:20px;border-radius:16px;font-size:26px;font-weight:800;color:#60A5FA;">B2B Lead Capture</div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#FFCD11;">→</div>
+
+      <div class="card green" style="justify-content:space-between; text-align:center; padding:36px 28px;">
+        <div class="kicker">STEP 04 · B2B ROLLOUT</div>
+        <div>
+          <div style="font-size:42px;font-weight:800;color:#FFF;margin-bottom:14px;">Team Pilot</div>
+          <div style="font-size:23px;color:#E5E5E0;line-height:1.4;">Convert plant manager into $5K to $9K paid pilot &amp; site rollout.</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.45);padding:20px;border-radius:16px;font-size:26px;font-weight:800;color:#34D399;">$100K Target</div>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>05 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 6: 2-TRACK SCORECARD ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">06 · MILESTONES &amp; TARGETS (DEC 20 CHECK / MAR 31 GOAL)</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>Two Tracks. <span class="hl">Clear Milestones.</span></h1>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; flex: 1;">
+      <div class="card gold" style="justify-content:space-between;">
+        <div>
+          <div class="kicker">TRACK A · B2B PILOTS</div>
+          <div style="display:flex; align-items:baseline; gap:24px; margin: 12px 0 28px;">
+            <div class="huge hl">5 Pilots</div>
+            <div style="font-size:34px;font-weight:700;color:#E5E5E0;">→ $100K Signed</div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="background:rgba(0,0,0,0.38);padding:28px;border-radius:18px;">
+              <div style="font-size:15px;font-weight:800;color:#FFCD11;">ACTIVE USAGE</div>
+              <div style="font-size:46px;font-weight:800;color:#FFF;margin:8px 0;">50+ Techs</div>
+              <div style="font-size:20px;color:#D4D4CE;">6+ consecutive weeks (≥1/day)</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.38);padding:28px;border-radius:18px;">
+              <div style="font-size:15px;font-weight:800;color:#FFCD11;">OUTBOUND VOLUME</div>
+              <div style="font-size:46px;font-weight:800;color:#FFF;margin:8px 0;">60 / Day</div>
+              <div style="font-size:20px;color:#D4D4CE;">Bay Area local + drop-in demos</div>
+            </div>
+          </div>
+        </div>
+        <div class="tag-grid">
+          <span class="tag green">Active: Dunmore ($5K) · JWA ($9K) · Stanford · Therma</span>
+          <span class="tag gold">Next Wedge: Data Center Cx (Cortex CMMS · FluidStack · MEP)</span>
+        </div>
+      </div>
+
+      <div class="card green" style="justify-content:space-between;">
+        <div>
+          <div class="kicker">TRACK B · PLG SKATEBOARD</div>
+          <div style="display:flex; align-items:baseline; gap:24px; margin: 12px 0 28px;">
+            <div class="huge green">500 Users</div>
+            <div style="font-size:34px;font-weight:700;color:#E5E5E0;">→ 1,000 Users</div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="background:rgba(0,0,0,0.38);padding:28px;border-radius:18px;">
+              <div style="font-size:15px;font-weight:800;color:#34D399;">RETENTION GATE</div>
+              <div style="font-size:46px;font-weight:800;color:#FFF;margin:8px 0;">50%+</div>
+              <div style="font-size:20px;color:#D4D4CE;">Cohort retention target</div>
+            </div>
+            <div style="background:rgba(0,0,0,0.38);padding:28px;border-radius:18px;">
+              <div style="font-size:15px;font-weight:800;color:#34D399;">CUMULATIVE LOGS</div>
+              <div style="font-size:46px;font-weight:800;color:#FFF;margin:8px 0;">15,000+</div>
+              <div style="font-size:20px;color:#D4D4CE;">Generated reports &amp; SOPs</div>
+            </div>
+          </div>
+        </div>
+        <div class="tag-grid">
+          <span class="tag green">Checkpoints: Dec 20 &amp; Mar 31</span>
+          <span class="tag">TestFlight Live This Weekend</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>06 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 7: 73 FIELD SEGMENTS (ZERO OVERLAP) ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">07 · MARKET EXPANSION</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>73 Field Segments. <span class="hl">One Path.</span></h1>
+
+    <div class="card" style="flex:1; padding: 20px 32px; justify-content:center;">
+      <svg width="1640" height="660" viewBox="0 0 1728 660" style="width:100%;height:100%;">
+        <defs>
+          <marker id="ah" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#FFCD11"/></marker>
+          <marker id="ahg" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#34D399"/></marker>
+          <linearGradient id="zone" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FFCD11" stop-opacity="0.03"/><stop offset="1" stop-color="#FFCD11" stop-opacity="0.20"/></linearGradient>
+        </defs>
+        <rect x="740" y="25" width="900" height="205" rx="18" fill="url(#zone)" stroke="rgba(255,205,17,0.35)" stroke-dasharray="6 6"/>
+        <line x1="170" y1="25" x2="170" y2="560" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+        <line x1="170" y1="560" x2="1660" y2="560" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+        <line x1="170" y1="205" x2="1660" y2="205" stroke="rgba(255,255,255,0.10)" stroke-dasharray="4 8"/>
+        <line x1="170" y1="385" x2="1660" y2="385" stroke="rgba(255,255,255,0.10)" stroke-dasharray="4 8"/>
+
+        <g font-size="18" fill="#B4B4AE" font-weight="700" letter-spacing="1.5">
+          <text x="148" y="120" text-anchor="end">SELF (PLG)</text>
+          <text x="148" y="300" text-anchor="end">MIXED</text>
+          <text x="148" y="475" text-anchor="end">COMPANY</text>
+          <text x="170" y="600">0 hr</text>
+          <text x="530" y="600" text-anchor="middle">1 hr / day</text>
+          <text x="890" y="600" text-anchor="middle">2 hrs / day</text>
+          <text x="1250" y="600" text-anchor="middle">3 hrs / day</text>
+          <text x="1610" y="600" text-anchor="middle">4 hrs / day</text>
+        </g>
+        <text x="1660" y="642" text-anchor="end" font-size="20" fill="#FFCD11" font-weight="700">Report time per worker per day →</text>
+        <text x="24" y="290" font-size="20" fill="#D3D3D1" font-weight="600" transform="rotate(-90 24 290)" text-anchor="middle">Who pays</text>
+
+        <!-- Background Census Bubbles -->
+        <circle cx="290" cy="145" r="26" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/>
+        <circle cx="450" cy="150" r="30" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/>
+        <circle cx="880" cy="150" r="24" fill="rgba(16,185,129,0.25)" stroke="#34D399" stroke-width="3"/>
+        <circle cx="1180" cy="135" r="26" fill="rgba(16,185,129,0.25)" stroke="#34D399" stroke-width="3"/>
+        <circle cx="1500" cy="125" r="28" fill="rgba(16,185,129,0.25)" stroke="#34D399" stroke-width="3"/>
+        <circle cx="780" cy="300" r="34" fill="rgba(255,205,17,0.28)" stroke="#FFCD11" stroke-width="3"/>
+        <circle cx="1120" cy="315" r="26" fill="rgba(255,205,17,0.22)" stroke="#FFCD11" stroke-width="2.5"/>
+        <circle cx="510" cy="465" r="34" fill="rgba(255,205,17,0.25)" stroke="#FFCD11" stroke-width="3"/>
+        <circle cx="860" cy="475" r="26" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+
+        <!-- Arrows -->
+        <path d="M 542 448 C 635 380, 695 340, 742 315" fill="none" stroke="#FFCD11" stroke-width="5" marker-end="url(#ah)"/>
+        <path d="M 1150 148 C 1010 205, 900 250, 822 285" fill="none" stroke="#34D399" stroke-width="5" marker-end="url(#ahg)"/>
+
+        <!-- Well-Spaced Labels with Halo Stroke so zero overlap -->
+        <text x="510" y="412" font-size="23" font-weight="800" fill="#FFCD11" text-anchor="middle" paint-order="stroke" stroke="#0B0B0D" stroke-width="8">Plant Maintenance</text>
+        <text x="860" y="532" font-size="21" font-weight="600" fill="#D4D4CE" text-anchor="middle" paint-order="stroke" stroke="#0B0B0D" stroke-width="8">Campus &amp; Utilities</text>
+        <text x="780" y="244" font-size="25" font-weight="900" fill="#FFCD11" text-anchor="middle" paint-order="stroke" stroke="#0B0B0D" stroke-width="8">Data Center Cx &amp; MEP</text>
+        <text x="1120" y="370" font-size="21" font-weight="700" fill="#F5F5F3" text-anchor="middle" paint-order="stroke" stroke="#0B0B0D" stroke-width="8">Construction GC</text>
+        <text x="880" y="106" font-size="22" font-weight="800" fill="#34D399" text-anchor="middle" paint-order="stroke" stroke="#0B0B0D" stroke-width="8">Home Inspectors</text>
+        <text x="1180" y="90" font-size="22" font-weight="800" fill="#34D399" text-anchor="middle" paint-order="stroke" stroke="#0B0B0D" stroke-width="8">Appraisers</text>
+        <text x="1500" y="80" font-size="22" font-weight="800" fill="#34D399" text-anchor="middle" paint-order="stroke" stroke="#0B0B0D" stroke-width="8">Insurance Adjusters</text>
+        <text x="450" y="102" font-size="20" font-weight="600" fill="#9CA3AF" text-anchor="middle">Trades</text>
+        <text x="290" y="102" font-size="20" font-weight="600" fill="#9CA3AF" text-anchor="middle">Fleet</text>
+
+        <rect x="315" y="448" width="145" height="36" rx="18" fill="#FFCD11"/><text x="387" y="472" font-size="15" font-weight="900" fill="#000" text-anchor="middle">TRACK A · B2B</text>
+        <rect x="1445" y="172" width="165" height="36" rx="18" fill="#10B981"/><text x="1527" y="196" font-size="15" font-weight="900" fill="#000" text-anchor="middle">TRACK B · PLG</text>
+      </svg>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>07 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 8: LONG-TERM VISION (ZERO OVERLAP, CRISP CALLOUT CARDS ON CURVE) ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">08 · LONG-TERM VISION</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>Voice Today. <span class="hl">Spatial Twin &amp; Robotics Data Next.</span></h1>
+
+    <div class="card" style="flex:1; padding: 24px 36px; justify-content:center;">
+      <svg width="1650" height="660" viewBox="0 0 1728 660" style="width:100%;height:100%;">
+        <defs>
+          <linearGradient id="ar3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFCD11" stop-opacity="0.28"/><stop offset="1" stop-color="#FFCD11" stop-opacity="0.0"/></linearGradient>
+          <marker id="ah2" viewBox="0 0 12 12" refX="9" refY="6" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="rgba(255,255,255,0.45)"/></marker>
+        </defs>
+
+        <!-- Shaded Area under Carbyn Curve -->
+        <path d="M 140 520 C 460 500, 760 350, 1120 195 C 1340 115, 1510 85, 1680 75 L 1680 555 L 140 555 Z" fill="url(#ar3)"/>
+
+        <!-- Axes -->
+        <line x1="140" y1="30" x2="140" y2="555" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+        <line x1="140" y1="555" x2="1700" y2="555" stroke="rgba(255,255,255,0.35)" stroke-width="2" marker-end="url(#ah2)"/>
+
+        <!-- Falling Human Manual Work Curve -->
+        <path d="M 140 90 C 460 110, 760 270, 1120 430 C 1340 500, 1510 522, 1680 530" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="3.5" stroke-dasharray="10 10"/>
+
+        <!-- Rising Carbyn Curve -->
+        <path d="M 140 520 C 460 500, 760 350, 1120 195 C 1340 115, 1510 85, 1680 75" fill="none" stroke="#FFCD11" stroke-width="7"/>
+
+        <!-- NODE 1: NOW (x=220, y=509) -->
+        <circle cx="220" cy="509" r="16" fill="#FFCD11"/>
+        <g paint-order="stroke" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="round">
+          <text x="220" y="380" font-size="16" font-weight="800" fill="#FFCD11" letter-spacing="2">NOW</text>
+          <text x="220" y="424" font-size="38" font-weight="800" fill="#FFF">Voice → Doc</text>
+          <text x="220" y="458" font-size="21" fill="#D4D4CE">Talk the job. Form filled.</text>
+        </g>
+
+        <!-- NODE 2: NEXT (x=640, y=385) -->
+        <circle cx="640" cy="385" r="15" fill="#0B0B0D" stroke="#FFCD11" stroke-width="5"/>
+        <g paint-order="stroke" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="round">
+          <text x="668" y="415" font-size="16" font-weight="800" fill="#FFCD11" letter-spacing="2">NEXT</text>
+          <text x="668" y="458" font-size="38" font-weight="800" fill="#FFF">POV Vision → SOP</text>
+          <text x="668" y="492" font-size="21" fill="#D4D4CE">1st-person video becomes guide.</text>
+        </g>
+
+        <!-- NODE 3: 2027 (x=1060, y=220) - Positioned cleanly ABOVE the curve -->
+        <circle cx="1060" cy="220" r="15" fill="#0B0B0D" stroke="#FFCD11" stroke-width="5"/>
+        <g paint-order="stroke" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="round">
+          <text x="1040" y="95" text-anchor="end" font-size="16" font-weight="800" fill="#FFCD11" letter-spacing="2">2027</text>
+          <text x="1040" y="138" text-anchor="end" font-size="38" font-weight="800" fill="#FFF">Spatial 3DGS Twin</text>
+          <text x="1040" y="172" text-anchor="end" font-size="21" fill="#D4D4CE">Defects &amp; notes pinned in 3D space.</text>
+        </g>
+
+        <!-- NODE 4: 2028 (x=1560, y=82) - Positioned cleanly BELOW-RIGHT of Node 3 -->
+        <circle cx="1560" cy="82" r="17" fill="#10B981" stroke="#FFF" stroke-width="4"/>
+        <g paint-order="stroke" stroke="#0B0B0D" stroke-width="8" stroke-linejoin="round">
+          <text x="1660" y="155" text-anchor="end" font-size="16" font-weight="800" fill="#34D399" letter-spacing="2">2028</text>
+          <text x="1660" y="198" text-anchor="end" font-size="38" font-weight="800" fill="#FFF">Robotics World Model</text>
+          <text x="1660" y="232" text-anchor="end" font-size="21" fill="#D4D4CE">Egocentric action dataset for robots.</text>
+        </g>
+
+        <!-- Axis & Curve Labels -->
+        <text x="1675" y="508" text-anchor="end" font-size="20" fill="#9CA3AF">Human work left ↓</text>
+        <text x="75" y="295" font-size="21" fill="#FFCD11" font-weight="700" transform="rotate(-90 75 295)" text-anchor="middle">Share of the Job &amp; Spatial Data Captured ↑</text>
+
+        <!-- Bottom Modality Markers -->
+        <text x="280" y="610" text-anchor="middle" font-size="18" font-weight="800" fill="#FFCD11" letter-spacing="2">PHONE / VOICE</text>
+        <text x="700" y="610" text-anchor="middle" font-size="18" font-weight="800" fill="#FFCD11" letter-spacing="2">POV CAMERA</text>
+        <text x="1120" y="610" text-anchor="middle" font-size="18" font-weight="800" fill="#FFCD11" letter-spacing="2">3D GAUSSIAN SPLATTING</text>
+        <text x="1560" y="610" text-anchor="middle" font-size="18" font-weight="800" fill="#34D399" letter-spacing="2">PHYSICAL AI CORPUS</text>
+      </svg>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>08 / 09</span></div>
+</section></div>
+
+<!-- ==================== SLIDE 9: ADVICE WE NEED FROM YOU ==================== -->
+<div class="slide-viewport"><section class="slide">
+  <div class="slide-bg-overlay"></div>
+  <div class="pad">
+    <div class="header-row">
+      <div class="label">09 · DISCUSSION</div>
+      <img class="brand-logo" src="assets/carbyn_logo.png" alt="CARBYN">
+    </div>
+    <h1>Advice We Need From <span class="hl">You.</span></h1>
+
+    <div class="card gold" style="flex:1; justify-content:center; padding: 56px 68px;">
+      <ul style="list-style:none; display:flex; flex-direction:column; gap: 46px;">
+        <li style="font-size:38px; font-weight:700; line-height:1.3; padding-left:44px; position:relative; color:#FFF;">
+          <span style="width:16px;height:16px;border-radius:50%;background:#FFCD11;position:absolute;left:0;top:18px;"></span>
+          <span style="color:#FFCD11;">Timing &amp; Focus:</span> Run fast PLG feedback loop (<i>Skateboard</i>) vs. scale B2B outbound volume?
+        </li>
+        <li style="font-size:38px; font-weight:700; line-height:1.3; padding-left:44px; position:relative; color:#FFF;">
+          <span style="width:16px;height:16px;border-radius:50%;background:#FFCD11;position:absolute;left:0;top:18px;"></span>
+          <span style="color:#FFCD11;">Industrial AI Trends:</span> What growth motions are working best across industrial startups lately?
+        </li>
+        <li style="font-size:38px; font-weight:700; line-height:1.3; padding-left:44px; position:relative; color:#FFF;">
+          <span style="width:16px;height:16px;border-radius:50%;background:#FFCD11;position:absolute;left:0;top:18px;"></span>
+          <span style="color:#FFCD11;">Next Fundraise Timing &amp; Story:</span> Lead with <b>Smart Glasses</b> vs. <b>Spatial / Robotics Tech</b> vs. <b>Revenue Traction</b>?
+        </li>
+        <li style="font-size:38px; font-weight:700; line-height:1.3; padding-left:44px; position:relative; color:#FFF;">
+          <span style="width:16px;height:16px;border-radius:50%;background:#FFCD11;position:absolute;left:0;top:18px;"></span>
+          <span style="color:#FFCD11;">Advisor / Network:</span> Any technical or industrial GTM advisor in your network we should meet?
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="ftr-rule"></div>
+  <div class="ftr"><span>CARBYN</span><span>09 / 09</span></div>
+</section></div>
+
+<div class="deck-hud">
+  <button onclick="navSlide(-1)">◀ Prev</button>
+  <span id="hud-counter" style="font-weight:700;min-width:56px;text-align:center;">01 / 09</span>
+  <button onclick="navSlide(1)">Next ▶</button>
+  <button onclick="toggleFS()">Fullscreen (F)</button>
+  <button onclick="window.print()">Print / PDF</button>
+</div>
+
+<script>
+  const viewports = Array.from(document.querySelectorAll('.slide-viewport'));
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('hud-counter');
+  function fitSlides() {
+    const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    slides.forEach(s => { s.style.transform = `scale(${scale})`; });
+  }
+  window.addEventListener('resize', fitSlides);
+  fitSlides();
+  function currentIdx() { return Math.round(window.scrollY / window.innerHeight); }
+  function navSlide(delta) {
+    const next = Math.max(0, Math.min(viewports.length - 1, currentIdx() + delta));
+    viewports[next].scrollIntoView({ behavior: 'smooth' });
+  }
+  window.addEventListener('scroll', () => {
+    const idx = Math.max(0, Math.min(viewports.length - 1, currentIdx()));
+    counter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(viewports.length).padStart(2, '0');
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); navSlide(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); navSlide(-1); }
+    else if (e.key === 'f' || e.key === 'F') { toggleFS(); }
+  });
+  function toggleFS() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+</script>
+</body>
+</html>
